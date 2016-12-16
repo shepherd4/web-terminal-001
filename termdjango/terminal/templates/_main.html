@@ -1,0 +1,305 @@
+{% load staticfiles %}
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery-1.7.1.min.js' %}"></script>
+    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery.mousewheel-min.js' %}"></script> 
+    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery.terminal.min.js' %}"></script>
+    <link href="{% static 'jcubic-jquery.terminal-5132759/css/jquery.terminal.css' %}" rel="stylesheet"/> 
+    <title>Terminal Emulator</title>
+
+    <script type="text/javascript">
+
+        var server_cmd_list = [];
+        var terminal_cmd_list = [
+            {
+                name: 'setbgcolor',
+                proc: function(term, args) { 
+                    term.echo(this.name); 
+                    term.echo(args);
+                }
+            },
+            {
+                name: 'settextcolor',
+                proc: function(term, args) { term.echo(this.name); term.echo(args); }
+            },
+            {
+                name: 'setpromptcolor',
+                proc: function(term, args) { term.echo(this.name); term.echo(args); }
+            }
+
+        ];
+
+        console.dir(terminal_cmd_list);
+
+        //конструктор класса 
+        function AnimatedPrintClass() 
+        {
+
+            this.print_animation = true;
+            this.str_counter = 0;
+            this.delay = 100;
+    /*
+            this.toString = function() {
+                return "print obj = \
+                            { print_animation: " + this.print_animation +
+                            ", str_counter: " + this.str_counter +
+                            "}";
+            };
+           */
+            this.print_strings = function(text, term)
+            {
+                var str_type = {}.toString.call(text).slice(8,-1);
+                console.log( "text is " + str_type );
+                console.log( "delay is " + this.delay );
+
+                if(str_type == 'Array')
+                {
+                    if(this.delay == undefined || this.delay == 0)
+                    {
+                        for(str in text)
+                        {
+                            term.echo(text[str]);
+                            console.log(text[str]);
+                        }
+                    }
+                    else
+                    {
+                        this.str_counter = 0;                 
+
+                        (function print_str() 
+                        {
+                            console.log( this );
+                            console.log( this.delay );
+
+                            if(this.print_animation == true)
+                            {
+                                if(this.str_counter < text.length)
+                                {
+                                    term.echo( text[this.str_counter] );
+                                    console.log( 'text[' + this.str_counter + '] = ' + text[this.str_counter] );
+                                    this.str_counter++;
+
+                                    setTimeout( print_str.call(this), this.delay );
+                                  //  setTimeout( function(){alert("lol");}, this.delay );
+                                }
+                            } 
+                            else 
+                            {
+                                this.print_animation = true;
+                            }
+                        }).call(this);
+                    }
+                }
+                else
+                {
+                    term.echo(text);
+                }
+            };
+        };
+
+        var animatedPrint = new AnimatedPrintClass;
+       // console.dir(animatedPrint);
+
+        //обработчик команд
+        function cmd_proc(command, term) {
+
+         /*   var i = 0;
+            var parse = $.terminal.parse_command(command);
+            console.dir(parse);
+
+            command = parse['name'];
+            console.log("command: " + command);
+
+          //  console.log(term.parse_command(command));
+
+            if (command == 'ls') {
+
+                animatedPrint.print_strings(string_array, term, 10);
+
+            } else if (command == 'cd') {
+                term.echo("you just typed 'cd'");
+            } else if (command == 'echo') {
+                term.echo("you just typed 'echo'");
+            } else if (command == 'help') {
+                term.echo("you just typed 'help'");   
+            } else if (command == 'hello') {
+                
+
+
+            } else {
+                //term.echo( "[[;#ff0000;]unknown command]" );
+                term.error("unknown command");
+            } */
+
+            //отправляем команду на сервер
+
+            var parse = $.terminal.parse_command(command);
+            console.dir(parse);
+/*
+            $.getJSON('/terminal/cmd-json/', 
+                        {
+                            "cmd" : parse['name'],
+                            "comment" : "command from terminal" 
+                        }, 
+                        function(json)
+                        {
+                            console.dir(json);
+
+                            //for(str in json.text) {
+                                //$('.terminal-output').append('<div>' + json.text[str] + '</div>');
+                                //term.echo(json.text[str]);        
+                             //   array_string = $.map(json.text, function(value, index) { return [value] });
+                            //    console.dir(array_string);                     
+                             //   animatedPrint.print_strings(array_string, term);
+                            //}
+                        });
+*/          
+            var find = false;
+            for( i in server_cmd_list )
+            {
+                if(parse['command'] == server_cmd_list[i])
+                {           
+                    $.getJSON(
+                                '/terminal/cmd-json/',
+                                {
+                                    "cmd": parse['name'],
+                                    "param" : parse['args']
+                                }
+                            )
+                        .done( function(json) {
+                                console.dir(json);
+                                animatedPrint.print_strings(json.text, term);
+                            }
+                        )            
+                        .fail( function(jqxhr, status, error) {
+                                console.log( error );
+                            }
+                        );
+                    return;
+                }
+            }
+
+            for( i in terminal_cmd_list )
+            {
+                if(parse['command'] == terminal_cmd_list[i].name)
+                {           
+                    console.log(terminal_cmd_list[i].name);
+                    terminal_cmd_list[i].proc(term, parse['args']);
+                    return;
+                }
+            }
+
+            term.echo('unknown command');
+            
+        }
+
+
+        var term_prop = {
+            prompt: "user: ",
+            name: "terminal",
+            greetings: null,
+            width: "100%",
+            height: "100%",
+
+            onInit: function(term) {
+              //  term.echo("Wellcome to Chebotkin E.S. website!");
+             //   console.dir(term);
+                 $.getJSON(
+                        '/terminal/init-json/',
+                        //JSON.stringify({"init":"hello"})
+                        {init:"hello"}
+                    )
+                .done( function(json) {
+                        console.dir(json);
+                        animatedPrint.delay = json.animation_delay;
+                        term.echo(json.welcom_msg);
+
+                        server_cmd_list = json.cmd_list;
+
+                        console.dir(server_cmd_list);
+                    }
+                )            
+                .fail( function(jqxhr, status, error) {
+                        console.log( error );
+                    }
+                );
+            }
+        };
+
+         
+        //setTimeout(function(){alert("timeout 1000");}, 1000);
+
+        $(function()
+        {
+            $('body').terminal(cmd_proc, term_prop);
+
+            //$('body').terminal(cmd_proc, term_prop);  
+       
+            //настройка фона терминала
+            $('body').css("background", "#336699");
+
+            //настройка цвета командной строки
+            $('.cmd').css("color", "white"); 
+            $('.cmd').css("background", "#336699"); 
+
+            $('.terminal').css("color", "white"); //цвет того что выводит терминал
+
+            $('.prompt').css("color", "#8CC971"); // 
+
+            console.dir(animatedPrint);
+/*
+            $.ajax({
+                url: '/terminal/init-json/',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                processData: false,
+                data: JSON.stringify({'msg':'hello json'}),
+                success: function(json) {
+                    $.terminal.active().echo(json);
+                },
+            });
+*/
+
+
+            
+/*
+            var csrftoken = $.cookie('csrftoken');
+
+            function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }      
+
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });*/
+
+       /*     var j = { 'init':'hello', 'csrfmiddlewaretoken': '{{ csrf_token}}' };
+
+            $.ajax({
+                url: '/terminal/init-json/',
+                type: 'POST',
+                contentType: 'application/json; charset=utf-8',
+                data: JSON.stringify(j),
+             //   contentType: 'json',
+            //    data: { 'init':'hello' },
+                dataType: 'text',
+                success: function(result) {
+                    console.log(result.Result);
+                },
+                
+            });*/
+
+        });
+    </script>
+
+  </head>
+<body>
+    
+</body>
