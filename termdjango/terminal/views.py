@@ -62,7 +62,7 @@ def event_cmd_json(request):
 				jsonResponse['credits'].append({"value":"<b>credits:</b>\
 						<pre>	Site build by Chebotkin E.S.</pre>\
 						<pre>	Using:</pre>\
-						<pre>	 * Jquery Terminal Emulator by Jakub Jankiewicz: <a href='http://terminal.jcubic.pl'>http://terminal.jcubic.pl</a></pre>\
+						<pre>	 * Jquery Terminal Emulator by Jakub Jankiewicz: <a href='http://terminal.jcubic.pl' style='color: white'>http://terminal.jcubic.pl</a></pre>\
 						<pre>	 * Django1.8:</pre>\
 						"})				
 	
