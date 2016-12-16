@@ -1,0 +1,169 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Terminal Emulator</title>
+    <script src="../js/jquery-1.7.1.min.js"></script>
+    <script src="../js/jquery.mousewheel-min.js"></script> 
+    <script src="../js/jquery.terminal.min.js"></script>
+    <link href="../css/jquery.terminal.css" rel="stylesheet"/> 
+    <script>
+
+    var string_array = ['lol','kek','azaza','dota','csgo','wow'];
+
+
+
+    //конструктор класса 
+    function AnimatedPrintClass() {
+
+        this.print_animation = true;
+        this.str_counter = 0;
+/*
+        this.toString = function() {
+            return "print obj = \
+                        { print_animation: " + this.print_animation +
+                        ", str_counter: " + this.str_counter +
+                        "}";
+        };
+       */
+        this.print_strings = function(text, term, delay)
+        {
+            var str_type = {}.toString.call(text).slice(8,-1);
+          //  console.log( "text is " + str_type );
+         //   console.log( "delay is " + delay );
+
+            if(str_type == 'Array')
+            {
+                if(delay == undefined || delay == 0)
+                {
+                    for(str in text)
+                    {
+                        term.echo(text[str]);
+                   //     console.log(text[str]);
+                    }
+                }
+                else
+                {
+                    this.str_counter = 0;                 
+
+                    (function print_str() 
+                    {
+                     //   console.log( this );
+
+                        if(this.print_animation == true)
+                        {
+                            if(this.str_counter < text.length)
+                            {
+                                term.echo( text[this.str_counter] );
+                              //  console.log( 'text[' + this.str_counter + '] = ' + text[this.str_counter] );
+                                this.str_counter++;
+
+                                setTimeout( print_str.call(this), delay );
+                            }
+                        } 
+                        else 
+                        {
+                            this.print_animation = true;
+                        }
+                    }).call(this);
+                }
+            }
+            else
+            {
+                term.echo(text);
+            }
+        };
+    };
+
+    var animatedPrint = new AnimatedPrintClass;
+    console.dir(animatedPrint);
+
+    //обработчик команд
+    function cmd_proc(command, term) {
+
+            var i = 0;
+            var parse = $.terminal.parse_command(command);
+            console.dir(parse);
+
+            command = parse['name'];
+            console.log("command is " + command);
+
+          //  console.log(term.parse_command(command));
+
+            if (command == 'ls') {
+
+                animatedPrint.print_strings(string_array, term, 10);
+
+            } else if (command == 'cd') {
+                term.echo("you just typed 'cd'");
+            } else if (command == 'echo') {
+                term.echo("you just typed 'echo'");
+            } else if (command == 'help') {
+                term.echo("you just typed 'help'");           
+            } else {
+                //term.echo( "[[;#ff0000;]unknown command]" );
+                term.error("unknown command");
+            } 
+        };
+
+    //объект свойст терминала
+  /*  function term_prop() {
+
+        this.prompt = "user: ";
+        this.name = "terminal";
+        this.greetings = null;
+
+        this.onInit = function(term) {
+            term.echo("Wellcome to Chebotkin E.S. website!");
+        };
+    };*/
+
+    var term_prop = {
+        prompt: "user: ",
+        name: "terminal",
+        greetings: null,
+
+        onInit: function(term) {
+            term.echo("Wellcome to Chebotkin E.S. website!");
+         //   console.dir(term);
+        }
+    };
+
+   // jQuery(document).ready(function($) {
+    $(function() {
+        $('body').terminal(cmd_proc, term_prop);  
+       
+        //настройка фона терминала
+        $('body').css("background", "#336699");
+
+        //настройка цвета командной строки
+        $('.cmd').css("color", "white"); 
+        $('.cmd').css("background", "#336699"); 
+
+        $('.terminal').css("color", "white"); //цвет того что выводит терминал
+
+        $('.prompt').css("color", "#8CC971"); //
+
+     //   console.dir($.terminal.active());
+
+      /*  $("body").cmd({
+            prompt: '$> ',
+            width: '100%',
+            commands: function(command) {
+
+            }
+        });*/
+
+    });
+
+
+
+
+    </script>
+  </head>
+<body>
+  <!--  <script type="text/javascript">
+        $('body').terminal(cmd_proc, term_prop); 
+    </script>
+    -->
+</body>

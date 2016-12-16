@@ -1,0 +1,118 @@
+{% load staticfiles %}
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery-1.7.1.min.js' %}"></script>
+    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery.mousewheel-min.js' %}"></script> 
+    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery.terminal.min.js' %}"></script>
+    <link href="{% static 'jcubic-jquery.terminal-5132759/css/jquery.terminal.css' %}" rel="stylesheet"/> 
+    <title>Terminal Emulator</title>
+    <script type="text/javascript">
+
+    function proc() {
+        var term = this; //save context
+         $.getJSON(
+                '/terminal/cmd-json/',
+                {
+                    "cmd": app.last_cmd.name,
+                    "param" : app.last_cmd.args
+                }
+            )
+            .done( function(json) {
+                 var name = app.last_cmd.name;
+
+                for(i in json[name]) {
+
+                    term.echo(
+                            json[name][i].value, {raw:true}
+                        );
+                }
+                term.echo();
+                console.dir(json);
+            })            
+            .fail( function(jqxhr, status, error) {
+                console.log( error );
+            });
+    }
+
+    var app = {
+
+        last_cmd: null,
+
+        motd: function(ret) {
+            if (typeof ret === 'undefined') ret = false;
+            var greetText = "";
+
+            if (!ret) {
+                this.echo("\b" + greetText);
+            } else {
+                return greetText;
+            }
+        },
+
+        super: function() {
+
+        }
+
+    }
+
+    var option = {
+        greetings: "Chebotkin E.S. - embedded developer.\nPlease type 'menu' for a list of commands", /*function(cb){
+            cb(app.motd(true));
+        }*/
+        
+
+        onBlur: function() {
+            return false;
+        },
+
+        completion: true,
+        checkArity: false,
+ 
+        onBeforeCommand: function(term, command){
+            app.last_cmd = $.terminal.parse_command(command);
+            return true;
+        },
+
+        onInit: function(term) {
+                 $.getJSON(
+                        '/terminal/init-json/',
+                        {init:"hello"}
+                    )
+                .done( function(json) {
+                        for(i in json.cmd_list)
+                        {
+                            var fname = json.cmd_list[i];
+                            app[fname] = proc;
+
+                        }
+                    }
+                )            
+                .fail( function(jqxhr, status, error) {
+                        console.log( error );
+                    }
+                )}
+    }
+
+    jQuery(document).ready( function($) {
+        $('body').terminal(app, option);
+
+        //setup color
+            $('body').css("background", "#336699");
+            $('body')
+
+            //настройка цвета командной строки
+            $('.cmd').css("color", "white"); 
+            $('.cmd').css("background", "#336699"); 
+
+            $('.terminal').css("color", "white");
+
+            $('.prompt').css("color", "#8CC971");                
+    });
+ 
+    </script>
+  </head>
+<body>
+    
+</body>
