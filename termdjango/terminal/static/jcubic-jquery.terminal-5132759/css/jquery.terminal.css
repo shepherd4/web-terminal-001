@@ -24,6 +24,36 @@
 .terminal h1, .terminal h2, .terminal h3, .terminal h4, .terminal h5, .terminal h6 {
     line-height: 1.2em;
 }
+
+@font-face{
+  font-family: 'OswaldLight';
+  src: url('../../fonts/Oswald-Light.ttf');
+  font-weight: normal;
+    font-style: normal;
+}
+
+
+@font-face{
+  font-family: 'OswaldMedium';
+  src: url('../../fonts/Oswald-Medium.ttf');
+  font-weight: normal;
+    font-style: normal;
+}
+
+@font-face{
+  font-family: 'OswaldStencil';
+  src: url('../../fonts/Oswald-Stencil.ttf');
+  font-weight: normal;
+    font-style: normal;
+}
+
+@font-face{
+  font-family: 'FSEX300';
+  src: url('../../fonts/FSEX300.ttf');
+  font-weight: normal;
+    font-style: normal;
+}
+
 /*
 .cmd .mask {
     width: 10px;
@@ -60,7 +90,7 @@
     color: #f00;
 }
 .terminal {
-    padding: 10px;
+    padding: 10px;    
     position: relative;
     /*overflow: hidden;*/
     overflow: auto;
@@ -133,13 +163,24 @@
     float: left;
 }
 .terminal, .cmd {
-    font-family: monospace;
+    /*font-family: monospace;*/
+    font-family: FSEX300;
     /*font-family: FreeMono, monospace; this don't work on Android */
     color: #aaa;
     background-color: #000;
     font-size: 12px;
-    line-height: 14px;
+    line-height: 14px;/*14px*/
 }
+
+.out-title {
+  font-family: FSEX300;
+}
+
+
+.out-text {
+  font-family: FSEX300;
+}
+
 .terminal-output > div {
     /*padding-top: 3px;*/
     min-height: 14px;

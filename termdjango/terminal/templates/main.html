@@ -38,6 +38,7 @@
     var app = {
 
         last_cmd: null,
+        bg_music: new Audio(),
 
         motd: function(ret) {
             if (typeof ret === 'undefined') ret = false;
@@ -52,12 +53,68 @@
 
         super: function() {
 
+        },
+
+        musicoff: function() {
+            console.dir(this);
+            app.bg_music.pause();
+            app.bg_music.currentTime = 0;
+            this.echo("background music stoped");
+        },
+
+        musicon: function() {
+            app.bg_music.play();
+            this.echo("background music play");
+        },
+
+        musicvolume: function(value) {
+            //console.log(arguments);
+
+            if(value == undefined)
+            {
+                this.error("Please set value");
+                return;
+            }
+            if(value > 100) { value = 100; }
+            if(value < 0) { value = 0; }
+
+            app.bg_music.volume = value/100;
+        },
+
+        setmusic: function(value) {
+            if(value == undefined)
+            {
+                this.error("Please set value");
+                return;
+            }
+            if(value > 3) { value = 3; }
+            if(value < 1) { value = 1; }
+
+            if(value == 1)
+                app.bg_music.src = "../static/sounds/Universe - Hideaway.mp3";
+            if(value == 2)
+                app.bg_music.src = "../static/sounds/Kavinsky - Nightcall.mp3";
+            if(value == 3)
+                app.bg_music.src = "../static/sounds/Mark Ronson ft. Bruno Mars - Uptown Funk.mp3";
+        },
+
+        playlist: function() {
+            this.echo("\t\t1 - Universe - Hideaway.mp3");
+            this.echo("\t\t2 - Kavinsky - Nightcall.mp3");
+            this.echo("\t\t3 - Mark Ronson ft. Bruno Mars - Uptown Funk.mp3");
         }
 
     }
 
     var option = {
-        greetings: "Chebotkin E.S. - embedded developer.\nPlease type 'menu' for a list of commands", /*function(cb){
+        greetings: "Chebotkin E.S. - embedded developer.\
+        \nPlease type 'menu' for a list of commands.\
+        \nMusic control commands:\
+        \n\t\tmusicoff\t\t\t\t\t   - sound off\
+        \n\t\tmusicon\t\t\t\t\t    - sound on\
+        \n\t\tplaylist\t\t\t\t\t   - view play list :)\
+        \n\t\tsetmusic [value:1..3]\t\t  - set background music\
+        \n\t\tmusicvolume [value:0...100]\t- set background music volume", /*function(cb){
             cb(app.motd(true));
         }*/
         
@@ -75,6 +132,11 @@
         },
 
         onInit: function(term) {
+
+                app.bg_music.src = "../static/sounds/Universe - Hideaway.mp3";
+                app.bg_music.autoplay = true;
+                app.bg_music.volume = 0.25;
+
                  $.getJSON(
                         '/terminal/init-json/',
                         {init:"hello"}
@@ -99,7 +161,8 @@
 
         //setup color
             $('body').css("background", "#336699");
-            $('body')
+            
+            console.dir(app);
 
             //настройка цвета командной строки
             $('.cmd').css("color", "white"); 
@@ -107,7 +170,11 @@
 
             $('.terminal').css("color", "white");
 
-            $('.prompt').css("color", "#8CC971");                
+            $('.prompt').css("color", "#8CC971");       
+
+
+            //$('.terminal').css("font-family", "OswaldLight");
+            //$('.terminal').css("font-size", "100%");         
     });
  
     </script>
