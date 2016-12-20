@@ -4,11 +4,50 @@
   <head>
     <meta charset="utf-8" />
     <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery-1.7.1.min.js' %}"></script>
-    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery.mousewheel-min.js' %}"></script> 
+    <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery.mousewheel-min.js' %}"></script>
     <script src="{% static 'jcubic-jquery.terminal-5132759/js/jquery.terminal.min.js' %}"></script>
-    <link href="{% static 'jcubic-jquery.terminal-5132759/css/jquery.terminal.css' %}" rel="stylesheet"/> 
-    <title>Terminal Emulator</title>
+    <link href="{% static 'jcubic-jquery.terminal-5132759/css/jquery.terminal.css' %}" rel="stylesheet"/>
+    <title>CV terminal</title>
     <script type="text/javascript">
+
+    var list = [
+    "<pre class='out-text'>      1 - Universe - Hideaway.mp3</pre>",
+    "<pre class='out-text'>      2 - Kavinsky - Nightcall.mp3</pre>",
+    "<pre class='out-text'>      3 - Mark Ronson ft. Bruno Mars - Uptown Funk.mp3</pre>"];
+
+    var title = [
+    "<pre class='out-text' style='color: White'> ██████╗██╗   ██╗    ████████╗███████╗██████╗ ███╗   ███╗██╗███╗   ██╗ █████╗ ██╗     </pre>",
+    "<pre class='out-text' style='color: White'>██╔════╝██║   ██║    ╚══██╔══╝██╔════╝██╔══██╗████╗ ████║██║████╗  ██║██╔══██╗██║     </pre>",
+    "<pre class='out-text' style='color: White'>██║     ██║   ██║       ██║   █████╗  ██████╔╝██╔████╔██║██║██╔██╗ ██║███████║██║     </pre>",
+    "<pre class='out-text' style='color: White'>██║     ╚██╗ ██╔╝       ██║   ██╔══╝  ██╔══██╗██║╚██╔╝██║██║██║╚██╗██║██╔══██║██║     </pre>",
+    "<pre class='out-text' style='color: White'>╚██████╗ ╚████╔╝        ██║   ███████╗██║  ██║██║ ╚═╝ ██║██║██║ ╚████║██║  ██║███████╗</pre>",
+    "<pre class='out-text' style='color: White'> ╚═════╝  ╚═══╝         ╚═╝   ╚══════╝╚═╝  ╚═╝╚═╝     ╚═╝╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝╚══════╝</pre>",
+    "<pre class='out-label' style='color: Red'><b>Website under construction!</b></pre>",
+    "<pre class='out-label'>Chebotkin E.S. - embedded developer.</pre>",
+    "<pre class='out-text'>Please type 'menu' for a list of commands.</pre>",
+    "<pre class='out-text'>Music control commands:</pre>",
+    "<pre class='out-text'>      musicoff                    - sound off</pre>",
+    "<pre class='out-text'>      musicon                     - sound on</pre>",
+    "<pre class='out-text'>      playlist                    - view playlist :)</pre>",
+    "<pre class='out-text'>      setmusic [value:1..3]       - set background music</pre>",
+    "<pre class='out-text'>      musicvolume [value:0...100] - set background music volume</pre>"];
+
+    function print_text(str_array, term, delay) {
+        var i = 0;
+        (function print_str()
+        {
+            if(i<str_array.length)
+            {
+                term.echo(str_array[i], {raw:true});
+                i++;
+                setTimeout(print_str, delay);
+            }
+            else
+            {
+                term.echo();
+            }
+        }).call();
+    };
 
     function proc() {
         var term = this; //save context
@@ -20,35 +59,21 @@
                 }
             )
             .done( function(json) {
-                 var name = app.last_cmd.name;
-
-                for(i in json[name]) {
-
-                    term.echo(
-                            json[name][i].value, {raw:true}
-                        );
-                }
-                term.echo();
-            })            
+                var name = app.last_cmd.name;
+		        print_text(json[name], term, 100);
+            })
             .fail( function(jqxhr, status, error) {
                 console.log( error );
             });
-    }
+    };
 
     var app = {
 
         last_cmd: null,
         bg_music: new Audio(),
 
-        motd: function(ret) {
-            if (typeof ret === 'undefined') ret = false;
-            var greetText = "";
-
-            if (!ret) {
-                this.echo("\b" + greetText);
-            } else {
-                return greetText;
-            }
+        hello: function() {
+            print_text(title, this, 100);
         },
 
         super: function() {
@@ -56,15 +81,12 @@
         },
 
         musicoff: function() {
-            console.dir(this);
             app.bg_music.pause();
             app.bg_music.currentTime = 0;
-            this.echo("background music stoped");
         },
 
         musicon: function() {
             app.bg_music.play();
-            this.echo("background music play");
         },
 
         musicvolume: function(value) {
@@ -97,22 +119,15 @@
         },
 
         playlist: function() {
-            this.echo("\t\t1 - Universe - Hideaway.mp3");
-            this.echo("\t\t2 - Kavinsky - Nightcall.mp3");
-            this.echo("\t\t3 - Mark Ronson ft. Bruno Mars - Uptown Funk.mp3");
+	        print_text(list,this,100);
         }
 
-    }
+    };
 
     var option = {
-        greetings: "Chebotkin E.S. - embedded developer.\
-        \nPlease type 'menu' for a list of commands.\
-        \nMusic control commands:\
-        \n\t\tmusicoff\t\t\t\t\t   - sound off\
-        \n\t\tmusicon\t\t\t\t\t    - sound on\
-        \n\t\tplaylist\t\t\t\t\t   - view play list :)\
-        \n\t\tsetmusic [value:1..3]\t\t  - set background music\
-        \n\t\tmusicvolume [value:0...100]\t- set background music volume",        
+        greetings: null,
+
+	    prompt: "guest:$ ",
 
         onBlur: function() {
             return false;
@@ -120,47 +135,50 @@
 
         completion: true,
         checkArity: false,
- 
+
         onBeforeCommand: function(term, command){
             app.last_cmd = $.terminal.parse_command(command);
             return true;
         },
 
-        onInit: function() { }
-    }
+        onInit: function(term) {
+            print_text(title, term, 100);
+	    }
+    };
 
     jQuery(document).ready( function($) {
 
 		app.bg_music.src = "{% static 'sounds/Universe - Hideaway.mp3' %}";
-                app.bg_music.autoplay = true;
-                app.bg_music.volume = 0.25;
-                $.getJSON(
-                        '/terminal/init-json/',
-                        {init:"hello"}
-                    )
-                .done( function(json) {
-                        for(i in json.cmd_list)
-                        {
-                            var fname = json.cmd_list[i];
-                            app[fname] = proc;
-			}
+        app.bg_music.autoplay = true;
+        app.bg_music.volume = 0.10;
+        $.getJSON(
+                '/terminal/init-json/',
+                {init:"hello"}
+        )
+        .done( function(json) {
+                for(i in json.cmd_list)
+                {
+                    var fname = json.cmd_list[i];
+                    app[fname] = proc;
+	            }
 
-		        $('body').terminal(app, option);
-		        $('body').css("background", "#336699");
-		        $('.cmd').css("color", "white"); 
-		        $('.cmd').css("background", "#336699"); 
-		        $('.terminal').css("color", "white");
-		        $('.prompt').css("color", "#8CC971");
-                    }
-                )            
-                .fail( function(jqxhr, status, error) {
-                        console.log( error );
-                    }
-                )         
+	            $('body').terminal(app, option);
+
+	            $('body').css("background", "#0C0C15");
+                $('.cmd').css("color", "#A8E5A9");
+                $('.cmd').css("background", "#0C0C15");
+                $('.terminal').css("color", "#D5D4EE");
+                $('.prompt').css("color", "#5EC460");
+
+        })
+        .fail( function(jqxhr, status, error) {
+                console.log( error );
+            }
+        )
     });
- 
+
     </script>
   </head>
 <body>
-    
+
 </body>
