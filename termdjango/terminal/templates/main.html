@@ -126,13 +126,15 @@
             return true;
         },
 
-        onInit: function(term) {
+        onInit: function() { }
+    }
 
-                app.bg_music.src = "{% static 'sounds/Universe - Hideaway.mp3' %}";
+    jQuery(document).ready( function($) {
+
+		app.bg_music.src = "{% static 'sounds/Universe - Hideaway.mp3' %}";
                 app.bg_music.autoplay = true;
                 app.bg_music.volume = 0.25;
-
-                 $.getJSON(
+                $.getJSON(
                         '/terminal/init-json/',
                         {init:"hello"}
                     )
@@ -141,35 +143,20 @@
                         {
                             var fname = json.cmd_list[i];
                             app[fname] = proc;
+			}
 
-                        }
+		        $('body').terminal(app, option);
+		        $('body').css("background", "#336699");
+		        $('.cmd').css("color", "white"); 
+		        $('.cmd').css("background", "#336699"); 
+		        $('.terminal').css("color", "white");
+		        $('.prompt').css("color", "#8CC971");
                     }
                 )            
                 .fail( function(jqxhr, status, error) {
                         console.log( error );
                     }
-                )}
-    }
-
-    jQuery(document).ready( function($) {
-        $('body').terminal(app, option);
-
-        //setup color
-            $('body').css("background", "#336699");
-            
-            console.dir(app);
-
-            //настройка цвета командной строки
-            $('.cmd').css("color", "white"); 
-            $('.cmd').css("background", "#336699"); 
-
-            $('.terminal').css("color", "white");
-
-            $('.prompt').css("color", "#8CC971");       
-
-
-            //$('.terminal').css("font-family", "OswaldLight");
-            //$('.terminal').css("font-size", "100%");         
+                )         
     });
  
     </script>
