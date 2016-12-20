@@ -4,3 +4,5 @@ termenv
 db.sqlite3
 .DS_Store
 ~*
+/termdjango/termdjango/settings.py
+/termdjango/static/*
